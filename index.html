@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Next Evolution of the Externship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B1F33; --ink-soft:#4A4F66; --paper:#FBF8F3; --paper-deep:#F3EDE3; --card:#FFFFFF;
+    --blue:#2853D2; --blue-soft:#E4EAFB; --amber:#E8A33D; --amber-soft:#FBF0DC;
+    --green:#2E9E6B; --green-soft:#E2F3EB; --red:#C4472F; --red-soft:#F9E4DF;
+    --navy:#141830; --navy-ink:#F5EFE4; --radius:18px;
+    --font:"Manrope",-apple-system,"Segoe UI",system-ui,Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:var(--font);background:var(--paper);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  /* ---------- engine ---------- */
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:5.5vh 6vw;background:var(--paper)}
+  .slide.active{display:flex}
+  .slide.dark{background:var(--navy);color:var(--navy-ink)}
+  #progress{position:fixed;top:0;left:0;height:5px;background:var(--blue);width:0%;z-index:50;transition:width .35s ease}
+  #counter{position:fixed;bottom:18px;left:24px;font-size:13px;font-weight:600;letter-spacing:.08em;color:var(--ink-soft);z-index:50;font-variant-numeric:tabular-nums}
+  #hint{position:fixed;bottom:18px;right:24px;font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--ink-soft);opacity:.55;z-index:50}
+  .frag{opacity:0;transform:translateY(14px);transition:opacity .4s ease,transform .4s ease}
+  .frag.on{opacity:1;transform:none}
+  @media (prefers-reduced-motion: reduce){.frag{transition:none;transform:none}#progress{transition:none}}
+
+  /* ---------- type ---------- */
+  .eyebrow{font-size:clamp(12px,1.1vw,16px);font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--blue);margin-bottom:1.6vh}
+  .dark .eyebrow{color:var(--amber)}
+  h1{font-size:clamp(40px,6.2vw,92px);font-weight:800;line-height:1.02;letter-spacing:-0.03em;text-wrap:balance}
+  h2{font-size:clamp(28px,3.5vw,54px);font-weight:800;line-height:1.08;letter-spacing:-0.025em;text-wrap:balance;max-width:22em}
+  .sub{font-size:clamp(17px,1.7vw,25px);color:var(--ink-soft);margin-top:2.6vh;max-width:34em;line-height:1.5}
+  .dark .sub{color:#B9BDD4}
+  .punch{font-size:clamp(18px,2vw,30px);font-weight:800;letter-spacing:-0.015em;margin-top:2.4vh;line-height:1.3;max-width:34em}
+  .punch .hl{color:var(--blue)}
+  .dark .punch .hl{color:var(--amber)}
+  .src{font-size:12.5px;color:var(--ink-soft);opacity:.75;margin-top:1.4vh;letter-spacing:.02em}
+  .dark .src{color:#9BA0BC}
+
+  /* ---------- pieces ---------- */
+  .chip{display:inline-flex;align-items:center;gap:.45em;background:var(--blue-soft);color:var(--blue);border-radius:999px;padding:.35em 1em;font-weight:700;font-size:clamp(12px,1.05vw,16px);white-space:nowrap}
+  .chip.win{background:var(--green-soft);color:var(--green)}
+  .chip.warn{background:var(--amber-soft);color:#9A6A15}
+  .chip.bad{background:var(--red-soft);color:var(--red)}
+  .chiprow{display:flex;flex-wrap:wrap;gap:.6vw;margin-top:1.6vh}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:0 2px 6px rgba(27,31,51,.06),0 10px 26px rgba(27,31,51,.07)}
+
+  /* agenda */
+  .agenda{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vw;margin-top:3.5vh}
+  .ag{padding:1.6vw 1.6vw 1.8vw;border-top:6px solid var(--blue)}
+  .ag .num{font-size:clamp(13px,1.1vw,15px);font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--blue)}
+  .ag h3{font-size:clamp(20px,2.1vw,32px);font-weight:800;letter-spacing:-0.02em;margin:.8vh 0 .9vh;line-height:1.15}
+  .ag p{font-size:clamp(13px,1.25vw,18px);color:var(--ink-soft);line-height:1.45}
+  .ag .min{display:inline-block;margin-top:1.4vh;font-weight:800;font-size:clamp(12px,1.05vw,15px);color:var(--ink)}
+  .ag.two{border-top-color:var(--amber)} .ag.two .num{color:#9A6A15}
+  .ag.three{border-top-color:var(--green)} .ag.three .num{color:var(--green)}
+
+  /* stat row */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1.3vw;margin-top:2.6vh}
+  .stats.three{grid-template-columns:repeat(3,1fr)}
+  .stat{padding:1.3vw 1.4vw}
+  .stat .n{font-size:clamp(32px,4vw,60px);font-weight:800;letter-spacing:-0.035em;line-height:1;color:var(--blue);font-variant-numeric:tabular-nums}
+  .stat .n.bad{color:var(--red)}
+  .stat .n small{font-size:.42em;letter-spacing:-0.01em;color:var(--ink);font-weight:800;margin-left:.15em}
+  .stat .l{font-size:clamp(13px,1.2vw,17px);font-weight:800;margin-top:.9vh;line-height:1.3}
+  .stat .d{font-size:clamp(12px,1.05vw,15px);color:var(--ink-soft);margin-top:.4vh;line-height:1.4}
+
+  /* nps bars */
+  .npsgrid{display:grid;grid-template-columns:1.25fr .75fr;gap:1.6vw;margin-top:2.6vh;align-items:stretch}
+  .bars{padding:1.4vw 1.6vw}
+  .bars .row{display:grid;grid-template-columns:9.5em 1fr 4.2em;align-items:center;gap:1vw;margin-top:1.1vh}
+  .bars .row:first-of-type{margin-top:0}
+  .bars .nm{font-size:clamp(12.5px,1.15vw,16.5px);font-weight:800;line-height:1.2}
+  .bars .nm small{display:block;font-weight:600;color:var(--ink-soft);font-size:.82em}
+  .bars .track{height:clamp(14px,1.6vh,22px);background:var(--paper-deep);border-radius:99px;overflow:hidden}
+  .bars .track{position:relative}
+  .bars .zero{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink-soft);opacity:.45;left:33.333%}
+  .bars .fill{position:absolute;top:0;bottom:0;background:var(--blue);border-radius:99px}
+  .bars .row.muted .nm,.bars .row.muted .v{color:var(--ink-soft)}
+  .bars .row.muted .fill{background:#B9BDD4}
+  .bars .fill.mid{background:var(--amber)} .bars .fill.low{background:var(--red)}
+  .bars .v{font-size:clamp(14px,1.35vw,20px);font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+  .bars .grp{font-size:clamp(11px,.95vw,13.5px);font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin:1.8vh 0 .4vh}
+  .bars .grp:first-child{margin-top:0}
+  .side{padding:1.4vw 1.5vw;display:flex;flex-direction:column;gap:1.2vh}
+  .side h3{font-size:clamp(15px,1.5vw,21px);font-weight:800;line-height:1.25}
+  .side p{font-size:clamp(13px,1.2vw,17px);line-height:1.45;color:var(--ink-soft)}
+  .side p b{color:var(--ink)}
+
+  /* funnel */
+  .funnel{display:grid;grid-template-columns:repeat(5,1fr);gap:.9vw;margin-top:3vh;align-items:start}
+  .fstep{display:flex;flex-direction:column;align-items:stretch}
+  .fstep .barwrap{height:30vh;display:flex;align-items:flex-end}
+  .fstep .bar{width:100%;background:var(--blue);border-radius:12px 12px 4px 4px;display:flex;align-items:flex-start;justify-content:center;padding-top:.8vh;color:#fff;font-weight:800;font-size:clamp(15px,1.6vw,24px);font-variant-numeric:tabular-nums;min-height:3.2em}
+  .fstep .bar.warn{background:var(--amber);color:var(--ink)}
+  .fstep .bar.bad{background:var(--red)}
+  .fstep .cap{font-size:clamp(12.5px,1.15vw,16.5px);font-weight:800;margin-top:1vh;line-height:1.25;min-height:4.4em}
+  .fstep .cap small{display:block;font-weight:600;color:var(--ink-soft);font-size:.86em;margin-top:.2em}
+
+  /* voices */
+  .voices{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2vw;margin-top:2.6vh}
+  .voices.four{grid-template-columns:repeat(4,1fr)}
+  .voice{padding:1.3vw 1.35vw;display:flex;flex-direction:column}
+  .voice .tag{font-size:clamp(11px,.95vw,13.5px);font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-bottom:.8vh}
+  .voice.good .tag{color:var(--green)}
+  .voice h3{font-size:clamp(16px,1.55vw,22px);font-weight:800;line-height:1.22;letter-spacing:-0.01em}
+  .voice q{display:block;font-size:clamp(13px,1.18vw,16.5px);line-height:1.45;color:var(--ink-soft);margin-top:1vh;font-style:italic;quotes:"\201C" "\201D"}
+  .voice .ct{margin-top:auto;padding-top:1.2vh;font-size:clamp(11.5px,1vw,14px);font-weight:700;color:var(--ink-soft)}
+
+  /* themes */
+  .themes{display:grid;grid-template-columns:repeat(5,1fr);gap:1vw;margin-top:3vh}
+  .themes.four{grid-template-columns:repeat(4,1fr)}
+  .theme.prod{border-top-color:var(--green)} .theme.prod .k{color:var(--green)}
+  .theme.open{border-top-style:dashed;border-top-color:var(--amber)} .theme.open .k{color:#9A6A15}
+  .theme{padding:1.4vw 1.2vw;display:flex;flex-direction:column;border-top:6px solid var(--blue)}
+  .theme .k{font-size:clamp(28px,3vw,44px);font-weight:800;color:var(--blue);line-height:1;letter-spacing:-0.03em}
+  .theme h3{font-size:clamp(15px,1.5vw,21px);font-weight:800;line-height:1.2;letter-spacing:-0.01em;margin-top:1.2vh}
+  .theme p{font-size:clamp(12.5px,1.12vw,16px);line-height:1.42;color:var(--ink-soft);margin-top:.9vh;margin-bottom:1.4vh}
+  .theme .ev{margin-top:auto;padding-top:1.3vh;font-size:clamp(11px,.95vw,13.5px);font-weight:700;color:var(--ink-soft);border-top:1px dashed #E3DCCF}
+
+  /* star ladder */
+  .ladder{display:grid;grid-template-columns:repeat(5,1fr);gap:1vw;margin-top:3vh;align-items:end}
+  .rung{background:#1D2440;border-radius:var(--radius);padding:1.3vw 1.2vw;display:flex;flex-direction:column}
+  .rung .st{font-size:clamp(15px,1.45vw,21px);font-weight:800;color:var(--amber);letter-spacing:.02em}
+  .rung p{font-size:clamp(12.5px,1.15vw,16.5px);line-height:1.45;color:#D3D6E6;margin-top:.9vh}
+  .rung.r1{min-height:18vh}.rung.r2{min-height:23vh}.rung.r3{min-height:28vh}.rung.r4{min-height:33vh}.rung.r5{min-height:38vh}
+
+  /* breakout */
+  .brk{display:grid;grid-template-columns:1fr 1fr;gap:1.6vw;margin-top:3vh}
+  .bx{padding:1.5vw 1.6vw}
+  .bx .lbl{font-size:clamp(11px,.95vw,13.5px);font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-bottom:1vh}
+  .bx.p2 .lbl{color:var(--green)}
+  .bx h3{font-size:clamp(18px,1.8vw,26px);font-weight:800;line-height:1.2;letter-spacing:-0.015em}
+  .bx p,.bx li{font-size:clamp(13px,1.22vw,17.5px);line-height:1.45;color:var(--ink-soft)}
+  .bx p{margin-top:1vh}
+  .bx ol,.bx ul{margin-top:1.2vh;padding-left:1.2em}
+  .bx li + li{margin-top:.6vh}
+  .bx b{color:var(--ink)}
+
+  /* closing */
+  .steps{counter-reset:s;display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vw;margin-top:3.5vh}
+  .step{background:#1D2440;border-radius:var(--radius);padding:1.6vw}
+  .step::before{counter-increment:s;content:counter(s);display:flex;align-items:center;justify-content:center;width:2.1em;height:2.1em;border-radius:50%;background:var(--amber);color:var(--navy);font-weight:800;font-size:clamp(14px,1.4vw,20px);margin-bottom:1.3vh}
+  .step h3{font-size:clamp(15px,1.6vw,23px);font-weight:800;letter-spacing:-0.01em;margin-bottom:.7vh;color:var(--navy-ink)}
+  .step p{font-size:clamp(13px,1.25vw,17px);color:#B9BDD4;line-height:1.5}
+
+  .notes{display:none}
+  body.notes-on .slide.active .notes{display:block;position:fixed;left:24px;right:24px;bottom:56px;z-index:60;background:var(--navy);color:var(--navy-ink);border-radius:12px;padding:14px 18px;font-size:14.5px;line-height:1.5;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  .notes b{color:var(--amber)}
+  .centered{align-items:center;text-align:center}
+  .centered .sub,.centered .punch{margin-left:auto;margin-right:auto}
+
+  body{background:var(--paper)}
+  @media (max-width: 760px){
+    html,body{height:auto}
+    body{overflow:auto}
+    .slide{position:relative;inset:auto;display:flex;padding:40px 18px;min-height:0}
+    .frag{opacity:1;transform:none}
+    #progress,#counter,#hint{display:none}
+    h2{max-width:none}
+    .agenda,.stats,.stats.three,.npsgrid,.voices,.voices.four,.themes,.themes.four,.ladder,.brk,.steps{grid-template-columns:1fr;gap:12px}
+    .funnel{grid-template-columns:repeat(5,1fr);gap:6px}
+    .fstep .bar{font-size:13px}
+    .fstep .cap{font-size:11.5px}
+    .rung{min-height:0 !important}
+    .ag,.stat,.bars,.side,.voice,.theme,.bx,.step,.rung{padding:16px}
+    .bars .row{grid-template-columns:7.5em 1fr 3em}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ TITLE ═══════════ -->
+<section class="slide centered active">
+  <div class="eyebrow">Extern All Hands · September 23</div>
+  <h1>The next evolution of the externship.</h1>
+  <p class="sub">An honest look at the student experience today, what students are telling us, and what it should become. Your view from your seat is the point.</p>
+</section>
+
+<!-- ═══════════ FRAMING ═══════════ -->
+<section class="slide">
+  <div class="eyebrow">Before we start</div>
+  <h2>This is about the system, not any team.</h2>
+  <div class="agenda">
+    <div class="card ag"><div class="num">What this is</div><h3>An honest look</h3><p>Everything today cuts across product, PM ops, L&amp;D and partnerships. Much of it traces to choices we made on purpose to scale fast. They were the right calls then.</p></div>
+    <div class="card ag two"><div class="num">What changed</div><h3>The bar moved</h3><p>Universities grade us honestly. Student patience for AI-feeling content flipped in six months. Schools are starting to run their own surveys.</p></div>
+    <div class="card ag three"><div class="num">Why now</div><h3>A big new partner in December</h3><p>A large online university: monthly starts, adult learners, their survey instruments, not ours. Publishers follow next year. That's the date the next-level experience has to be real for.</p></div>
+  </div>
+  <p class="punch frag">Not a list of everything that's broken. <span class="hl">What matters most, and what it should become.</span></p>
+</section>
+
+<!-- ═══════════ AGENDA ═══════════ -->
+<section class="slide">
+  <div class="eyebrow">How today works</div>
+  <h2>Three parts. The last two are yours.</h2>
+  <div class="agenda">
+    <div class="card ag"><div class="num">Part 1</div><h3>Where the platform is today</h3><p>What students do, where they stop, and what they tell us. Quick and honest.</p><span class="min">~8 min</span></div>
+    <div class="card ag two"><div class="num">Part 2</div><h3>Four themes, and what's missing</h3><p>The patterns we already see. Then what you see from your seat that isn't on the list.</p><span class="min">~10 min</span></div>
+    <div class="card ag three"><div class="num">Part 3</div><h3>Picture the target</h3><p>Small groups sketch a student's first two weeks as they should be, and name the biggest gaps from today.</p><span class="min">~20 min</span></div>
+  </div>
+  <p class="punch frag">One ground rule: <span class="hl">start from what students came for, not from what the platform does today.</span></p>
+</section>
+
+<!-- ═══════════ PART 1 DIVIDER ═══════════ -->
+
+<section class="slide dark centered">
+  <div class="eyebrow">Part 1</div>
+  <h1>Where the platform is today.</h1>
+  <p class="sub">Students come to us for one reason: to get closer to a job. How well are we doing at that?</p>
+</section>
+
+<!-- ═══════════ NPS ═══════════ -->
+<section class="slide">
+  <div class="eyebrow">What students tell us · end-of-program surveys</div>
+  <h2>University students are telling us something our other students don't.</h2>
+  <div class="npsgrid">
+    <div class="card bars">
+      <div class="grp">Partner A, three cohorts in a row</div>
+      <div class="row"><div class="nm">Winter<small>n=33</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:36.67%"></div></div><div class="v">+55</div></div>
+      <div class="row"><div class="nm">Spring<small>n=25</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:28.67%"></div></div><div class="v">+43</div></div>
+      <div class="row"><div class="nm">Summer<small>n=18</small></div><div class="track"><div class="zero"></div><div class="fill mid" style="left:33.333%;width:14.67%"></div></div><div class="v">+22</div></div>
+      <div class="grp">Other partners, summer 2026</div>
+      <div class="row"><div class="nm">Partner B<small>n=8</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:33.33%"></div></div><div class="v">+50</div></div>
+      <div class="row"><div class="nm">Partner C<small>n=5</small></div><div class="track"><div class="zero"></div><div class="fill mid" style="left:33.333%;width:13.33%"></div></div><div class="v">+20</div></div>
+      <div class="row"><div class="nm">Partner D<small>n=17</small></div><div class="track"><div class="zero"></div><div class="fill mid" style="left:33.333%;width:8.67%"></div></div><div class="v">+13</div></div>
+      <div class="row"><div class="nm">Partner E<small>n=14</small></div><div class="track"><div class="zero"></div><div class="fill low" style="left:9.333%;width:24%"></div></div><div class="v">−36</div></div>
+      <div class="grp">For comparison</div>
+      <div class="row muted"><div class="nm">Paying members<small>n=1,005, Jul to Sep</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:30%"></div></div><div class="v">+45</div></div>
+    </div>
+    <div class="card side">
+      <h3>Why the gap?</h3>
+      <p>Paying members who don't like it <b>cancel before they ever see a survey.</b> The ones who answer are the ones who stayed.</p>
+      <p>University students <b>don't get to cancel.</b> They finish the program and tell us what it was really like.</p>
+      <p>From our team: <b>"We are getting some of them through who would normally churn from dissatisfaction."</b></p>
+    </div>
+  </div>
+  <p class="src">Surveys go to completers only, in every group. Every university sample is small (5 to 18). Partner F (+100) left out because the survey was tied to a $1,000 stipend. Paying members = post-externship survey in the Extern Brain, last three months.</p>
+</section>
+
+<!-- ═══════════ JOURNEY ═══════════ -->
+<section class="slide">
+  <div class="eyebrow">What students do · paying members who started Apr 25 to Jul 23</div>
+  <h2>Starting is easy. Half are gone after the first week.</h2>
+  <div class="npsgrid">
+    <div class="card bars" style="padding:1.4vw 1.6vw 1.2vw">
+      <div class="funnel" style="margin-top:0">
+        <div class="fstep"><div class="barwrap"><div class="bar" style="height:91%">91%</div></div><div class="cap">Started<small>did any step</small></div></div>
+        <div class="fstep"><div class="barwrap"><div class="bar" style="height:72%">72%</div></div><div class="cap">Got to Project 1<small>past orientation</small></div></div>
+        <div class="fstep"><div class="barwrap"><div class="bar warn" style="height:52%">52%</div></div><div class="cap">Back after week 1<small>active after day 7</small></div></div>
+        <div class="fstep"><div class="barwrap"><div class="bar warn" style="height:37%">37%</div></div><div class="cap">Finished Project 1<small>median 16 days in</small></div></div>
+        <div class="fstep"><div class="barwrap"><div class="bar bad" style="height:18%">18%</div></div><div class="cap">Finished it all<small>still rising, see note</small></div></div>
+      </div>
+    </div>
+    <div class="card side">
+      <h3>Where week one goes wrong</h3>
+      <p><b>3 minutes</b> from enrolling to the first step. Getting started isn't the problem.</p>
+      <p><b>29%</b> never get past orientation in week one, and <b>59% of them never come back.</b></p>
+      <p><b>1 in 3</b> who start are only active on their first day.</p>
+      <p><b>We don't measure the thing they came for.</b> No data on jobs or internships. 1 of 1,884 survey answers mentions an offer.</p>
+    </div>
+  </div>
+  <p class="src">Extern Brain, data through Sep 20. 6,171 students who trialed or paid, counted across all their enrollments. Stages are milestones reached, not a strict funnel. Program completion is a floor: the median finisher takes 60 days and the newest students haven't had that long.</p>
+</section>
+
+<!-- ═══════════ VOICES ═══════════ -->
+<section class="slide">
+  <div class="eyebrow">The same things, from every partner</div>
+  <h2>Students love the real work. They don't love how it's delivered.</h2>
+  <div class="voices four">
+    <div class="card voice"><div class="tag">Heard most</div><h3>It feels like a course, not an internship</h3><q>Make it more engaging, it felt a little useless sometimes. Also try not to be repetitive.</q><div class="ct">Partner E 6 of 14 · Partner D 7 of 17 (workload, repetition) · 6 of 17 (too much text)</div></div>
+    <div class="card voice"><div class="tag">Hurts most</div><h3>Nobody looks at my work</h3><q>Tomorrow is the last day and I still haven't received any feedback on my assignments.</q><div class="ct">Partner A 3+ · Partner D 4 of 17 (thin PM presence) · Partner C: one student sent 4 videos, none were watched</div></div>
+    <div class="card voice"><div class="tag">Hard to hear</div><h3>It reads like AI wrote it</h3><q>Most of the time I was being taught by an AI rather than a working professional.</q><div class="ct">Partners A, C and E · plus outdated tutorials at C and F · more video asked for everywhere</div></div>
+    <div class="card voice good"><div class="tag">What they love</div><h3>Real work for a real company</h3><q>It felt like real VC work, building an actual diligence pack rather than a simulated exercise.</q><div class="ct">Partner D 7 of 17 · D winter 15 of 19 · Partner C 4 of 5 · AI and tool skills close behind</div></div>
+  </div>
+  <p class="punch frag" style="font-size:clamp(15px,1.5vw,22px)">Paying members say it too: <span class="hl">28% ask for video, 20% for clearer instructions and examples, 14% for a real person's feedback.</span></p>
+  <p class="src">Counts from Bifei's end-of-program reports and the raw survey sheets. Member themes: 1,673 written survey answers since March, keyword-coded, directional. Quotes lightly trimmed.</p>
+</section>
+
+<!-- ═══════════ TURN ═══════════ -->
+<section class="slide dark centered">
+  <div class="eyebrow">The turn</div>
+  <h2>We could spend the hour listing holes.</h2>
+  <p class="punch frag">But patching holes assumes the experience underneath is right. <span class="hl">What if we started from what students actually came for?</span></p>
+</section>
+
+<!-- ═══════════ PART 2 DIVIDER ═══════════ -->
+<section class="slide dark centered">
+  <div class="eyebrow">Part 2</div>
+  <h1>Four themes, and what's missing.</h1>
+  <p class="sub">Three patterns from every survey, plus one from the product side. Then your turn: what do you see from your seat that isn't here?</p>
+</section>
+
+<!-- ═══════════ THEMES ═══════════ -->
+<section class="slide">
+  <div class="eyebrow">What students keep telling us</div>
+  <h2>Not human enough yet, and not where students are.</h2>
+  <div class="themes">
+    <div class="card theme"><div class="k">1</div><h3>Feedback is the #1 gap</h3><p>Students submit work into a black hole. Some certificates go out for work nobody reviewed. That's a credential problem, not just an experience one.</p><div class="ev">Open question: what's the minimum bar before a certificate goes out?</div></div>
+    <div class="card theme"><div class="k">2</div><h3>Content reads as AI, and patience for that flipped</h3><p>Walls of text, paste-a-prompt tasks. Same programs, but the bar moved in six months.</p><div class="ev">We know fixes that work: the tone-of-voice test lifted NPS, one program's edits jumped P1 completion ~30 points, another's redesign hit our second-best completion</div></div>
+    <div class="card theme"><div class="k">3</div><h3>Not enough humans</h3><p>One mentor session a month that many can't make. Host companies feel distant. Some students never hear from their PM.</p><div class="ev">Not "more PMs": drop-in coaches, alumni, outside pros. Proven in an earlier corporate program.</div></div>
+    <div class="card theme prod"><div class="k">4</div><h3>Meets students where they are</h3><p>Every format: read, watch, listen, practice. A real mobile app, so the work goes where they go. And it feels like a job, not coursework.</p><div class="ev">28% of member survey answers ask for video. Mobile arrivals finish Project 1 at 31% vs 41% on desktop.</div></div>
+    <div class="card theme open"><div class="k">?</div><h3>What's missing?</h3><p>From your seat. A few we've heard: the platform itself, live meetings, and the path to an actual job.</p><div class="ev">Add yours out loud or in the thread</div></div>
+  </div>
+  <p class="punch frag">Two questions: <span class="hl">does this match what you see, and what's missing?</span></p>
+</section>
+
+<!-- ═══════════ PART 3 DIVIDER ═══════════ -->
+<section class="slide dark centered">
+  <div class="eyebrow">Part 3</div>
+  <h1>Picture the target.</h1>
+  <p class="sub">Not solutions yet. What should a student's first two weeks feel like, and how far are we from it?</p>
+</section>
+
+<!-- ═══════════ STAR LADDER ═══════════ -->
+<section class="slide dark">
+  <div class="eyebrow">The 11-star exercise · Brian Chesky, Airbnb</div>
+  <h2>Imagine the absurd version. The great version gets obvious.</h2>
+  <div class="ladder">
+    <div class="rung r1"><div class="st">3 stars</div><p>I sign up and get a wall of text and a quiz. Nobody knows I'm here.</p></div>
+    <div class="rung r2"><div class="st">5 stars</div><p>I start a real task in ten minutes, it's clear what good looks like, and I get feedback on my first submission the next day.</p></div>
+    <div class="rung r3"><div class="st">7 stars</div><p>On day one someone who did this externship messages me by name. My first task arrives as a Slack request from the company.</p></div>
+    <div class="rung r4"><div class="st">9 stars</div><p>I keep going on my commute from my phone. My work lands in a portfolio a recruiter has already looked at.</p></div>
+    <div class="rung r5"><div class="st">11 stars</div><p>The host company's team reviews my final deck on a live call and invites me to interview.</p></div>
+  </div>
+  <p class="punch frag">We won't build 11 stars. But <span class="hl">once you've pictured 11, getting to 7 stops feeling like a stretch.</span></p>
+</section>
+
+<!-- ═══════════ BREAKOUT ═══════════ -->
+<section class="slide">
+  <div class="eyebrow">Breakout · groups of three · 12 minutes</div>
+  <h2>Picture one student's first 14 days, as they should be.</h2>
+  <div class="brk">
+    <div class="card bx">
+      <div class="lbl">Pick your student</div>
+      <h3>Maya, Dev or Rosa</h3>
+      <ul>
+        <li><b>Maya</b>, a sophomore at a partner university. Her professor assigned the externship. She didn't choose us.</li>
+        <li><b>Dev</b>, a recent grad paying his own way. He wants a finance job within six months.</li>
+        <li><b>Rosa</b>, 34, an online university student switching careers. Works full time, studies at night.</li>
+      </ul>
+      <p>Use <b>one theme</b> from Part 2 as your lens.</p>
+    </div>
+    <div class="card bx p2">
+      <div class="lbl">What to bring back</div>
+      <h3>The target, and the gap</h3>
+      <ol>
+        <li>Three moments in days 1 to 14 that make your student feel <b>real progress</b> toward why they came.</li>
+        <li>For each one, where it is today (in stars) and what the <b>7-star</b> version looks like.</li>
+        <li>The <b>biggest gap</b> between that picture and today.</li>
+      </ol>
+      <p>One person shares. Two minutes, no slides. No solutions needed yet.</p>
+    </div>
+  </div>
+  <p class="src">Why the first two weeks: that's where most students decide whether this is worth it. See Part 1.</p>
+</section>
+
+<!-- ═══════════ SHARE OUT ═══════════ -->
+<section class="slide">
+  <div class="eyebrow">Share out · 2 minutes per group</div>
+  <h2>What did you picture, and where's the biggest gap?</h2>
+  <div class="brk">
+    <div class="card bx"><div class="lbl">Listen for</div><h3>Patterns across groups</h3><ul><li>Gaps more than one group named</li><li>What had to be true for 7 stars (a person? feedback? the company?)</li><li>How Maya, Dev and Rosa differ</li></ul></div>
+    <div class="card bx p2"><div class="lbl">Capture</div><h3>One thread, today</h3><ul><li>Each group posts its three moments and biggest gap in the Slack thread after the call</li><li>Anything you'd add to "what's missing" goes there too</li></ul></div>
+  </div>
+</section>
+
+<!-- ═══════════ CLOSE ═══════════ -->
+<section class="slide dark">
+  <div class="eyebrow">What happens next</div>
+  <h2>Today is the picture. Next we rank the gaps with data.</h2>
+  <div class="steps">
+    <div class="step"><h3>Today</h3><p>Groups post their target and biggest gap in the Slack thread by end of day.</p></div>
+    <div class="step"><h3>Next week</h3><p>We bring the top gaps back with richer data: support tickets, splits by program and segment, what we've heard on user calls. Then we prioritize together.</p></div>
+    <div class="step"><h3>Q4</h3><p>Matt takes it from there, with December's new partner launch as the date the next level has to be real.</p></div>
+  </div>
+  <p class="punch frag">Students come to us for real work and a shot at a job. <span class="hl">Let's build the experience around that.</span></p>
+</section>
+
+<div id="progress"></div>
+<div id="counter">1 / 1</div>
+<div id="hint">→ next · F fullscreen</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0;
+  var progress = document.getElementById('progress');
+  var counter = document.getElementById('counter');
+  function frags(s){ return Array.prototype.slice.call(s.querySelectorAll('.frag')); }
+  function paint(){
+    slides.forEach(function(s,idx){ s.classList.toggle('active', idx===i); });
+    progress.style.width = ((i+1)/slides.length*100) + '%';
+    counter.textContent = (i+1) + ' / ' + slides.length;
+    try{ history.replaceState(null,'','#'+(i+1)); }catch(err){}
+  }
+  function next(){
+    var pending = frags(slides[i]).filter(function(f){ return !f.classList.contains('on'); });
+    if(pending.length){ pending[0].classList.add('on'); return; }
+    if(i < slides.length-1){ i++; paint(); }
+  }
+  function prev(){
+    var shown = frags(slides[i]).filter(function(f){ return f.classList.contains('on'); });
+    if(shown.length){ shown[shown.length-1].classList.remove('on'); return; }
+    if(i > 0){ i--; paint(); }
+  }
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter'){ e.preventDefault(); next(); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); prev(); }
+    else if(e.key === 'Home'){ i = 0; paint(); }
+    else if(e.key === 'End'){ i = slides.length-1; paint(); }
+        else if(e.key.toLowerCase() === 'f'){
+      try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(err){}
+    }
+  });
+  document.addEventListener('click', function(e){ if(e.target.closest('a') || window.matchMedia('(max-width: 760px)').matches) return; next(); });
+  var h = parseInt((location.hash||'').replace('#',''),10);
+  if(h && h>=1 && h<=slides.length){ i = h-1; }
+  paint();
+})();
+</script>
+</body>
+</html>
