@@ -84,6 +84,10 @@
   .bars .fill{position:absolute;top:0;bottom:0;background:var(--blue);border-radius:99px}
   .bars .row.muted .nm,.bars .row.muted .v{color:var(--ink-soft)}
   .bars .row.muted .fill{background:#B9BDD4}
+  .bars .bench{position:absolute;top:0;bottom:0;left:63.333%;border-left:2px dashed var(--ink);opacity:.55}
+  .bars .track{overflow:visible}
+  .legend .sw{display:inline-block;width:0;height:1.2em;border-left:2px dashed var(--ink);opacity:.55}
+  .legend{align-items:center;gap:.5vw !important;display:flex;justify-content:flex-end;gap:1.2vw;font-size:clamp(11px,.95vw,13.5px);font-weight:800;color:var(--ink-soft);margin-bottom:.6vh}
   .bars .fill.mid{background:var(--amber)} .bars .fill.low{background:var(--red)}
   .bars .v{font-size:clamp(14px,1.35vw,20px);font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
   .bars .grp{font-size:clamp(11px,.95vw,13.5px);font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin:1.8vh 0 .4vh}
@@ -217,30 +221,30 @@
 
 <!-- ═══════════ NPS ═══════════ -->
 <section class="slide">
-  <div class="eyebrow">What students tell us · end-of-program surveys</div>
-  <h2>University students are telling us something our other students don't.</h2>
+  <div class="eyebrow">Would students recommend us? · end-of-program surveys</div>
+  <h2>Most university cohorts now score below our paying members, and the trend is down.</h2>
   <div class="npsgrid">
     <div class="card bars">
+      <div class="legend"><span class="sw"></span><span>Paying members, +45</span></div>
       <div class="grp">Partner A, three cohorts in a row</div>
-      <div class="row"><div class="nm">Winter<small>n=33</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:36.67%"></div></div><div class="v">+55</div></div>
-      <div class="row"><div class="nm">Spring<small>n=25</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:28.67%"></div></div><div class="v">+43</div></div>
-      <div class="row"><div class="nm">Summer<small>n=18</small></div><div class="track"><div class="zero"></div><div class="fill mid" style="left:33.333%;width:14.67%"></div></div><div class="v">+22</div></div>
+      <div class="row"><div class="nm">Winter<small>n=33</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:36.67%"></div><div class="bench"></div></div><div class="v">+55</div></div>
+      <div class="row"><div class="nm">Spring<small>n=25</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:28.67%"></div><div class="bench"></div></div><div class="v">+43</div></div>
+      <div class="row"><div class="nm">Summer<small>n=18</small></div><div class="track"><div class="zero"></div><div class="fill mid" style="left:33.333%;width:14.67%"></div><div class="bench"></div></div><div class="v">+22</div></div>
       <div class="grp">Other partners, summer 2026</div>
-      <div class="row"><div class="nm">Partner B<small>n=8</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:33.33%"></div></div><div class="v">+50</div></div>
-      <div class="row"><div class="nm">Partner C<small>n=5</small></div><div class="track"><div class="zero"></div><div class="fill mid" style="left:33.333%;width:13.33%"></div></div><div class="v">+20</div></div>
-      <div class="row"><div class="nm">Partner D<small>n=17</small></div><div class="track"><div class="zero"></div><div class="fill mid" style="left:33.333%;width:8.67%"></div></div><div class="v">+13</div></div>
-      <div class="row"><div class="nm">Partner E<small>n=14</small></div><div class="track"><div class="zero"></div><div class="fill low" style="left:9.333%;width:24%"></div></div><div class="v">−36</div></div>
-      <div class="grp">For comparison</div>
-      <div class="row muted"><div class="nm">Paying members<small>n=1,005, Jul to Sep</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:30%"></div></div><div class="v">+45</div></div>
+      <div class="row"><div class="nm">Partner B<small>n=8</small></div><div class="track"><div class="zero"></div><div class="fill" style="left:33.333%;width:33.33%"></div><div class="bench"></div></div><div class="v">+50</div></div>
+      <div class="row"><div class="nm">Partner C<small>n=5</small></div><div class="track"><div class="zero"></div><div class="fill mid" style="left:33.333%;width:13.33%"></div><div class="bench"></div></div><div class="v">+20</div></div>
+      <div class="row"><div class="nm">Partner D<small>n=17</small></div><div class="track"><div class="zero"></div><div class="fill mid" style="left:33.333%;width:8.67%"></div><div class="bench"></div></div><div class="v">+13</div></div>
+      <div class="row"><div class="nm">Partner E<small>n=14</small></div><div class="track"><div class="zero"></div><div class="fill low" style="left:9.333%;width:24.00%"></div><div class="bench"></div></div><div class="v">−36</div></div>
     </div>
     <div class="card side">
-      <h3>Why the gap?</h3>
-      <p>Paying members who don't like it <b>cancel before they ever see a survey.</b> The ones who answer are the ones who stayed.</p>
-      <p>University students <b>don't get to cancel.</b> They finish the program and tell us what it was really like.</p>
-      <p>From our team: <b>"We are getting some of them through who would normally churn from dissatisfaction."</b></p>
+      <h3>How to read it</h3>
+      <p><b>NPS</b> is the share who'd recommend us minus the share who wouldn't. It runs from −100 to +100.</p>
+      <p>The <b>dashed line</b> is our paying members: +45 over the last three months (n=1,005).</p>
+      <h3 style="margin-top:.6vh">Why universities score lower</h3>
+      <p>Members who don't like it <b>cancel before the survey.</b> University students can't cancel. <b>They finish and tell us what it was really like.</b></p>
     </div>
   </div>
-  <p class="src">Surveys go to completers only, in every group. Every university sample is small (5 to 18). Partner F (+100) left out because the survey was tied to a $1,000 stipend. Paying members = post-externship survey in the Extern Brain, last three months.</p>
+  <p class="src">Surveys go to completers only, in every group. University samples are small (5 to 33). Partner F (+100) left out because the survey was tied to a $1,000 stipend.</p>
 </section>
 
 <!-- ═══════════ JOURNEY ═══════════ -->
